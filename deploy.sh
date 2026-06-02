@@ -76,31 +76,32 @@ render() {
     return "$RENDER_PRESERVED"
   fi
   secure_cp "$tpl" "$dest"
-  # Plain substitutions from config.env. User-supplied SMTP values may contain
-  # sed metacharacters, so escape them for the replacement side.
+  # Plain substitutions from config.env. Any value that could carry sed
+  # metacharacters (&, |, \, newlines) is escaped for the replacement side;
+  # only constant literals (ports) are passed through raw.
   local smtp_sender; smtp_sender="$(sed_escape_repl "${SMTP_FROM:-$ADMIN_EMAIL}")"
   local smtp_host;   smtp_host="$(sed_escape_repl "${SMTP_HOST:-}")"
   local smtp_user;   smtp_user="$(sed_escape_repl "${SMTP_USERNAME:-}")"
   local smtp_pass;   smtp_pass="$(sed_escape_repl "${SMTP_PASSWORD:-}")"
   local smtp_sec;    smtp_sec="$(sed_escape_repl "${SMTP_SECURITY:-starttls}")"
   sed -i \
-    -e "s|__BASE_DOMAIN__|${BASE_DOMAIN}|g" \
-    -e "s|__ADMIN_EMAIL__|${ADMIN_EMAIL}|g" \
-    -e "s|__TZ__|${TZ}|g" \
-    -e "s|__AUTH_DOMAIN__|${AUTH_DOMAIN}|g" \
-    -e "s|__PHOTOS_DOMAIN__|${PHOTOS_DOMAIN}|g" \
-    -e "s|__FILES_DOMAIN__|${FILES_DOMAIN}|g" \
-    -e "s|__COLLABORA_DOMAIN__|${COLLABORA_DOMAIN}|g" \
-    -e "s|__WOPI_DOMAIN__|${WOPI_DOMAIN}|g" \
-    -e "s|__MAIL_DOMAIN__|${MAIL_DOMAIN}|g" \
-    -e "s|__VAULT_DOMAIN__|${VAULT_DOMAIN}|g" \
-    -e "s|__OUTLINE_DOMAIN__|${OUTLINE_DOMAIN}|g" \
-    -e "s|__NOTES_DOMAIN__|${NOTES_DOMAIN}|g" \
-    -e "s|__HOME_DOMAIN__|${HOME_DOMAIN}|g" \
-    -e "s|__UPLOAD_LOCATION__|${IMMICH_UPLOAD_LOCATION}|g" \
-    -e "s|__DB_DATA_LOCATION__|${IMMICH_DB_DATA_LOCATION}|g" \
-    -e "s|__OC_CONFIG_DIR__|${OPENCLOUD_CONFIG_DIR}|g" \
-    -e "s|__OC_DATA_DIR__|${OPENCLOUD_DATA_DIR}|g" \
+    -e "s|__BASE_DOMAIN__|$(sed_escape_repl "${BASE_DOMAIN}")|g" \
+    -e "s|__ADMIN_EMAIL__|$(sed_escape_repl "${ADMIN_EMAIL}")|g" \
+    -e "s|__TZ__|$(sed_escape_repl "${TZ}")|g" \
+    -e "s|__AUTH_DOMAIN__|$(sed_escape_repl "${AUTH_DOMAIN}")|g" \
+    -e "s|__PHOTOS_DOMAIN__|$(sed_escape_repl "${PHOTOS_DOMAIN}")|g" \
+    -e "s|__FILES_DOMAIN__|$(sed_escape_repl "${FILES_DOMAIN}")|g" \
+    -e "s|__COLLABORA_DOMAIN__|$(sed_escape_repl "${COLLABORA_DOMAIN}")|g" \
+    -e "s|__WOPI_DOMAIN__|$(sed_escape_repl "${WOPI_DOMAIN}")|g" \
+    -e "s|__MAIL_DOMAIN__|$(sed_escape_repl "${MAIL_DOMAIN}")|g" \
+    -e "s|__VAULT_DOMAIN__|$(sed_escape_repl "${VAULT_DOMAIN}")|g" \
+    -e "s|__OUTLINE_DOMAIN__|$(sed_escape_repl "${OUTLINE_DOMAIN}")|g" \
+    -e "s|__NOTES_DOMAIN__|$(sed_escape_repl "${NOTES_DOMAIN}")|g" \
+    -e "s|__HOME_DOMAIN__|$(sed_escape_repl "${HOME_DOMAIN}")|g" \
+    -e "s|__UPLOAD_LOCATION__|$(sed_escape_repl "${IMMICH_UPLOAD_LOCATION}")|g" \
+    -e "s|__DB_DATA_LOCATION__|$(sed_escape_repl "${IMMICH_DB_DATA_LOCATION}")|g" \
+    -e "s|__OC_CONFIG_DIR__|$(sed_escape_repl "${OPENCLOUD_CONFIG_DIR}")|g" \
+    -e "s|__OC_DATA_DIR__|$(sed_escape_repl "${OPENCLOUD_DATA_DIR}")|g" \
     -e "s|__AUTH_PORT_HTTP__|9000|g" \
     -e "s|__AUTH_PORT_HTTPS__|9443|g" \
     -e "s|__SMTP_HOST__|${smtp_host}|g" \
