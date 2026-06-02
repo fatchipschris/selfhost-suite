@@ -18,12 +18,33 @@ gen_b64()    { openssl rand -base64 "${1:-32}" | tr -d '\n'; }
 gen_pass()   { openssl rand -base64 "${1:-24}" | tr -d '\n/+='; }  # url/path-safe password
 gen_uuid()   { cat /proc/sys/kernel/random/uuid; }
 
+# ---- safe file creation ----------------------------------------------------
+# Copy a template to dest so dest is never group/other-readable, even briefly.
+# (umask 077 governs the create mode of the new file.)
+secure_cp() {
+  local src="$1" dest="$2"
+  ( umask 077; cp "$src" "$dest" )
+}
+
+# Write stdin to dest with mode 600 from the moment of creation.
+secure_write() {
+  local dest="$1"
+  ( umask 077; cat > "$dest" )
+}
+
+# Escape a string so it is safe as the REPLACEMENT half of `sed s|...|REPL|`.
+# Neutralizes the delimiters we use (| and /), the escape char, the match-group
+# ampersand, and embedded newlines.
+sed_escape_repl() {
+  printf '%s' "$1" | sed -e 's/[\/&|]/\\&/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g'
+}
+
 # Write KEY=VALUE into an env file ONLY if the key is absent or empty there.
 # Makes secret generation idempotent: re-running deploy.sh keeps existing
 # secrets (so you don't lock yourself out / orphan a DB password).
 ensure_kv() {
   local file="$1" key="$2" val="$3"
-  touch "$file"; chmod 600 "$file"
+  ( umask 077; touch "$file" )
   if grep -qE "^${key}=.+" "$file" 2>/dev/null; then
     return 0  # already set with a non-empty value, keep it
   fi
@@ -35,10 +56,9 @@ ensure_kv() {
 # Plain (non-secret) KEY=VALUE: always overwrite to reflect config.env.
 set_kv() {
   local file="$1" key="$2" val="$3"
-  touch "$file"
+  ( umask 077; touch "$file" )
   if grep -qE "^${key}=" "$file" 2>/dev/null; then
-    # escape for sed replacement
-    local esc; esc=$(printf '%s' "$val" | sed -e 's/[\/&]/\\&/g')
+    local esc; esc=$(sed_escape_repl "$val")
     sed -i "s/^${key}=.*/${key}=${esc}/" "$file"
   else
     printf '%s=%s\n' "$key" "$val" >> "$file"
@@ -73,10 +93,9 @@ dc() {
 
 # Wait until a container reports healthy (or running, if no healthcheck).
 wait_healthy() {
-  local name="$1" tries="${2:-60}"
+  local name="$1" tries="${2:-60}" st
   log "Waiting for '$name' to become healthy…"
   for _ in $(seq 1 "$tries"); do
-    local st
     st=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$name" 2>/dev/null || echo "missing")
     case "$st" in
       healthy|running) ok "$name is $st"; return 0 ;;
@@ -84,5 +103,6 @@ wait_healthy() {
       *) sleep 3 ;;
     esac
   done
-  warn "$name did not report healthy in time (status: ${st:-unknown}); continuing."
+  warn "$name did not report healthy in time (status: ${st:-unknown})."
+  return 1
 }
