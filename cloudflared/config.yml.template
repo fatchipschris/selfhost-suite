@@ -1,0 +1,12 @@
+# Cloudflare Tunnel ingress for the self-hosted suite.
+# deploy.sh renders this (only the enabled services) to ./out/cloudflared/config.yml.
+# Install to /etc/cloudflared/config.yml, then route DNS (see README).
+#
+# __TUNNEL_UUID__ and the credentials-file path come from `cloudflared tunnel create`.
+tunnel: __TUNNEL_UUID__
+credentials-file: /etc/cloudflared/__TUNNEL_UUID__.json
+ingress:
+# --- begin generated hostnames ---
+__INGRESS_RULES__
+# --- end generated hostnames ---
+  - service: http_status:404

@@ -1,0 +1,15 @@
+services:
+  silverbullet:
+    image: ghcr.io/silverbulletmd/silverbullet:2.8.1
+    container_name: silverbullet
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SB_FOLDER=/space
+      - SB_PORT=3000
+      - SB_HOSTNAME=0.0.0.0
+    ports:
+      - "127.0.0.1:8091:3000"
+    volumes:
+      - ./space:/space

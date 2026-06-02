@@ -1,0 +1,18 @@
+# NEVER commit rendered secrets or data.
+config.env
+out/
+services/*/.env
+services/*/.env.rolltop
+services/*/.apitoken
+services/*/data/
+services/*/pgdata/
+services/*/space/
+services/*/oc-config/
+services/*/oc-data/
+services/authentik/custom-templates/*
+services/authentik/certs/*
+!**/.gitkeep
+
+# Templates ARE committed (they contain no real secrets).
+!services/*/.env.template
+!services/*/.env.rolltop.template

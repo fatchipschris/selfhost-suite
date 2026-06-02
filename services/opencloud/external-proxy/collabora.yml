@@ -1,0 +1,8 @@
+---
+services:
+  collaboration:
+    ports:
+      - "127.0.0.1:9300:9300"
+  collabora:
+    ports:
+      - "127.0.0.1:9980:9980"

@@ -1,0 +1,9 @@
+---
+title: Private Productivity Suite
+# Edit freely — this is the Homepage launcher dashboard.
+# Docs: https://gethomepage.dev/configs/settings/
+headerStyle: clean
+layout:
+  Apps:
+    style: row
+    columns: 3

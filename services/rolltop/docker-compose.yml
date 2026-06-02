@@ -1,0 +1,14 @@
+services:
+  rolltop:
+    build: .
+    image: rolltop-local:latest
+    container_name: rolltop
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8080"
+    env_file:
+      - .env.rolltop
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=${TZ:-America/New_York}
