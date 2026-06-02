@@ -1,13 +1,12 @@
 # Self-Hosted Productivity Suite
 
-> **Davenport Software — "Deploy your own private productivity suite."**
-> One repo, one `deploy.sh`, fresh secrets, your domain. Photos, files +
-> collaborative office, webmail, SSO, passwords, a wiki, notes, and a launcher
-> — all self-hosted behind a Cloudflare Tunnel.
+> **Davenport Software** — one repo, one command, your domain. Photos, files,
+> office, webmail, passwords, wiki, and notes — self-hosted behind a Cloudflare
+> Tunnel, no open ports.
 
-This is a **reusable** deployment package distilled from a live production
-install. It ships **no real secrets**: every password/key/token is **generated
-fresh** by `deploy.sh` into per-service `.env` files (chmod 600, git-ignored).
+This is a **reusable** deployment package. It ships **no real secrets**: every
+password/key/token is **generated fresh** by `deploy.sh` into per-service `.env`
+files (chmod 600, git-ignored).
 
 ---
 
@@ -115,10 +114,8 @@ Copy `config.env.example` → `config.env`. Key fields:
 
 ## 5. How secrets are handled
 
-`deploy.sh` renders each `services/<svc>/.env.template` → `.env`, substituting
-`__PLACEHOLDER__` values from `config.env`, then replacing every `__GENERATE__`
-marker with a **fresh** `openssl rand` value (each marker gets its own distinct
-secret). Format-specific secrets are then strengthened:
+Every secret is generated fresh by `deploy.sh` with `openssl rand` — each
+marker gets its own distinct value, strengthened by format where it matters:
 
 | Secret | Generation |
 |---|---|
@@ -232,17 +229,13 @@ server-side mailboxes. See the patch note in §8.
 
 ---
 
-## 8. Known gotchas (lessons from the production build)
+## 8. Known gotchas
 
 - **Rolltop missing-plugin patch.** Upstream `ghcr.io/grahamsz/rolltop:latest`
   ships the `mail_filters` plugin *manifest* but not the compiled `.so`, so the
   loader aborts at startup with `realpath failed`. `services/rolltop/Dockerfile`
   builds a local image that deletes `/app/plugins/mail_filters` so the loader
   skips it. (That's why Rolltop is `build: .`, not a bare image.)
-- **SOGo vs IMAP → use Rolltop.** An earlier attempt used SOGo as the webmail/
-  groupware layer; it was heavy and fought the IMAP setup. Rolltop (a thin
-  per-user IMAP/SMTP webmail client) was the right altitude for "webmail in
-  front of existing mailboxes." This package ships Rolltop.
 - **OpenCloud `OC_DOMAIN` is immutable-ish.** Baked into the OIDC issuer + IdP
   on first init. Pick the hostname before first `up`. See §7.3.
 - **Authentik bootstrap is first-init-only.** `AUTHENTIK_BOOTSTRAP_PASSWORD` /
@@ -254,9 +247,7 @@ server-side mailboxes. See the patch note in §8.
 - **Everything binds 127.0.0.1.** If you front this with something other than
   Cloudflare Tunnel (e.g. a local reverse proxy), it must reach the loopback
   ports in §1; do **not** publish these ports publicly without TLS + auth.
-- **`home.<domain>` port.** Homepage listens on `3010`. (The source production
-  tunnel had a stale `home → 9000` rule pointing at Authentik; this package
-  routes `home.<domain>` to `3010` correctly.)
+- **`home.<domain>` port.** Homepage listens on `3010` (see §1).
 
 ---
 
