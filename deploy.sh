@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 #  Self-Hosted Productivity Suite — one-shot deployer
-#  Davenport Software · "Deploy your own private productivity suite"
+#  Davenport Pacific · "Deploy your own private productivity suite"
 # -----------------------------------------------------------------------------
 #  Reads ./config.env, renders per-service .env files (GENERATING fresh secrets),
 #  and brings the enabled stacks up in dependency order (Authentik + DBs first,

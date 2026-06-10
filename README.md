@@ -1,6 +1,6 @@
 # Self-Hosted Productivity Suite
 
-> **Davenport Software — "Deploy your own private productivity suite."**
+> **Davenport Pacific — "Deploy your own private productivity suite."**
 > One repo, one `deploy.sh`, fresh secrets, your domain. Photos, files +
 > collaborative office, webmail, SSO, passwords, a wiki, notes, and a launcher
 > — all self-hosted behind a Cloudflare Tunnel.
